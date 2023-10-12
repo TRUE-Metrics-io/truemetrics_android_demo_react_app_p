@@ -20,7 +20,9 @@ import {
   Button,
   TextInput,
   PermissionsAndroid,
-  Alert
+  Alert,
+  Image,
+  Pressable
 } from 'react-native';
 
 import {
@@ -29,11 +31,16 @@ import {
 
 import { MMKVLoader, useMMKVStorage } from 'react-native-mmkv-storage';
 
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
 const storage = new MMKVLoader().initialize();
 
 const { TruemetricsSdkModule } = NativeModules;
 
-function App(): JSX.Element {
+const Stack = createNativeStackNavigator();
+
+function HomeScreen({ navigation }): JSX.Element {
 
   const [truemetricsApiKey, setTruemetricsApiKey] = useMMKVStorage('truemetricsApiKey', storage, '');
   const [sdkState, setSdkState] = useState('')
@@ -94,11 +101,20 @@ function App(): JSX.Element {
                 {sdkState == 'RECORDING_IN_PROGRESS' &&
                   <Button title="Stop recording" onPress={() => TruemetricsSdkModule.stopRecording()} />
                 }
+
+                {(sdkState == 'INITIALIZED') &&
+                  <View style={{ margin: 10 }} >
+                    <Button
+                      title="Log metadata"
+                      onPress={() => navigation.navigate('LogMetadata')}
+                    />
+                  </View>
+                }
               </>
               :
               <>
                 <TextInput
-                style={styles.input}
+                  style={styles.input}
                   placeholder="Truemetrics SDK Api key"
                   onChangeText={setInputApiKey}
                   value={inputApiKey}
@@ -116,6 +132,71 @@ function App(): JSX.Element {
 
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function LogMetadataScreen({ navigation }) {
+
+  const [key, setKey] = useState('')
+  const [value, setValue] = useState('')
+
+  return (
+
+    <ScrollView>
+
+      <View style={[
+        {
+          flexDirection: 'row',
+        },
+      ]}>
+        <TextInput
+          style={[styles.input, { flex: 1 }]}
+          placeholder="Key"
+          onChangeText={setKey}
+        />
+        <TextInput
+          style={[styles.input, { flex: 1 }]}
+          placeholder="Value"
+          onChangeText={setValue}
+        />
+
+      </View>
+
+      <View style={[
+        {
+          flexDirection: 'row',
+          justifyContent: 'center'
+        },
+      ]}>
+
+        <Button title="Log metadata" onPress={() => {
+
+          if (key.trim() == "" || value.trim() == "") {
+            return
+          }
+
+          const params = new Map();
+          params.set("key", key)
+          params.set("value", value)
+          TruemetricsSdkModule.logMetadata(Object.fromEntries(params))
+
+          navigation.goBack();
+
+        }} />
+      </View>
+
+    </ScrollView>
+  );
+}
+
+function App(): JSX.Element {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="LogMetadata" component={LogMetadataScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 

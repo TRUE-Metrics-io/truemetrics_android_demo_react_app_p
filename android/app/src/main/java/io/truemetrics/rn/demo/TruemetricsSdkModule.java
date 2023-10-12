@@ -14,12 +14,15 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.truemetrics.truemetricssdk.ErrorCode;
 import io.truemetrics.truemetricssdk.StatusListener;
@@ -93,6 +96,14 @@ public class TruemetricsSdkModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void stopRecording() {
         TruemetricsSDK.stopRecording();
+    }
+
+    @ReactMethod
+    public void logMetadata(ReadableMap readableMap) {
+        Map<String, String> params = new HashMap<>();
+        params.put(readableMap.getString("key"), readableMap.getString("value"));
+         Log.d(TAG, "askPermissilogMetadataons params=" + params);
+        TruemetricsSDK.logMetadata(params);
     }
 
     private void sendSdkStateChangedEvent(String newState) {
