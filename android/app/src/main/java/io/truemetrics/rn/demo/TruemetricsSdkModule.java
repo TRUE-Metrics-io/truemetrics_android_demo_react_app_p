@@ -47,6 +47,16 @@ public class TruemetricsSdkModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public boolean isInitialized(){
+        return TruemetricsSDK.isInitialized();
+    }
+
+    @ReactMethod
+    public boolean isRecordingInProgress(){
+        return TruemetricsSDK.isRecordingInProgress();
+    }
+
+    @ReactMethod
     public void initializeSdk(String apiKey) {
         Log.d(TAG, "initializeSdk apiKey=" + apiKey);
 

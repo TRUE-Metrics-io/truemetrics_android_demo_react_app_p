@@ -21,20 +21,14 @@ import {
   TextInput,
   PermissionsAndroid,
   Alert,
-  Image,
-  Pressable
 } from 'react-native';
 
 import {
   Colors,
 } from 'react-native/Libraries/NewAppScreen';
 
-import { MMKVLoader, useMMKVStorage } from 'react-native-mmkv-storage';
-
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-const storage = new MMKVLoader().initialize();
 
 const { TruemetricsSdkModule } = NativeModules;
 
@@ -42,8 +36,8 @@ const Stack = createNativeStackNavigator();
 
 function HomeScreen({ navigation }: { navigation: any }): JSX.Element {
 
-  const [truemetricsApiKey, setTruemetricsApiKey] = useMMKVStorage('truemetricsApiKey', storage, '');
-  const [sdkState, setSdkState] = useState('')
+  const [truemetricsApiKey, setTruemetricsApiKey] = useState('');
+  const [sdkState, setSdkState] = useState('UNINITIALIZED')
   const [inputApiKey, setInputApiKey] = useState('')
   const [sdkError, setSdkError] = useState('')
 
@@ -78,10 +72,17 @@ function HomeScreen({ navigation }: { navigation: any }): JSX.Element {
   }, []);
 
   useEffect(() => {
-    if (truemetricsApiKey != '') {
-      TruemetricsSdkModule.initializeSdk(truemetricsApiKey)
+    let initialized = TruemetricsSdkModule.isInitialized()
+    let recordingInProgress = TruemetricsSdkModule.isRecordingInProgress()
+
+    if(recordingInProgress) {
+      setSdkState('RECORDING_IN_PROGRESS')
+    } else if(initialized) {
+      setSdkState('INITIALIZED')
+    } else {
+      setSdkState('UNINITIALIZED')
     }
-  })
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -102,27 +103,8 @@ function HomeScreen({ navigation }: { navigation: any }): JSX.Element {
 
           <View style={{ margin: 10 }} />
           {
-            truemetricsApiKey
+            sdkState == 'UNINITIALIZED'
               ?
-              <>
-                {(sdkState == 'INITIALIZED' || sdkState == 'RECORDING_STOPPED') &&
-                  <Button title="Start recording" onPress={() => TruemetricsSdkModule.startRecording()} />
-                }
-
-                {sdkState == 'RECORDING_IN_PROGRESS' &&
-                  <Button title="Stop recording" onPress={() => TruemetricsSdkModule.stopRecording()} />
-                }
-
-                {(sdkState == 'INITIALIZED') &&
-                  <View style={{ margin: 10 }} >
-                    <Button
-                      title="Log metadata"
-                      onPress={() => navigation.navigate('LogMetadata')}
-                    />
-                  </View>
-                }
-              </>
-              :
               <>
                 <TextInput
                   style={styles.input}
@@ -137,6 +119,23 @@ function HomeScreen({ navigation }: { navigation: any }): JSX.Element {
                     TruemetricsSdkModule.initializeSdk(inputApiKey);
                   }
                 }} />
+              </>
+              :
+              <>
+                {(sdkState == 'INITIALIZED' || sdkState == 'RECORDING_STOPPED') &&
+                  <Button title="Start recording" onPress={() => TruemetricsSdkModule.startRecording()} />
+                }
+
+                {sdkState == 'RECORDING_IN_PROGRESS' &&
+                  <Button title="Stop recording" onPress={() => TruemetricsSdkModule.stopRecording()} />
+                }
+
+                <View style={{ margin: 10 }} >
+                  <Button
+                    title="Log metadata"
+                    onPress={() => navigation.navigate('LogMetadata')}
+                  />
+                </View>
               </>
           }
         </View>

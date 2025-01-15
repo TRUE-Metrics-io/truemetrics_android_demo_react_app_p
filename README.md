@@ -1,79 +1,107 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Truemetrics SDK React Native Demo
 
-# Getting Started
+Demo app for integration and usage of the Truemetrics SDK for Android. The app showcases core SDK functionality including initialization, recording management, and metadata logging.
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+Getting started [documentation](https://docu.truemetrics.cloud/introduction)
 
-## Step 1: Start the Metro Server
+## Features
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+- SDK initialization with API key
+- Start/Stop recording functionality
+- Metadata logging
+- Permission handling for required Android permissions
+- Error handling and display
 
-To start Metro, run the following command from the _root_ of your React Native project:
+## Prerequisites
 
+- Node.js (v18 or later)
+- Java Development Kit (JDK) 17
+- Android Studio
+- Android SDK Platform Tools
+- React Native CLI
+
+## Setup
+
+1. Clone the repository:
 ```bash
-# using npm
-npm start
-
-# OR using Yarn
-yarn start
+git clone https://github.com/TRUE-Metrics-io/truemetrics_android_demo_react_app_p
+cd truemetrics_android_demo_react_app_p
 ```
 
-## Step 2: Start your Application
-
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
-
-### For Android
-
+2. Install dependencies:
 ```bash
-# using npm
+npm install
+```
+
+3. If needed, configure Android SDK path in your environment:
+```bash
+# Add to your ~/.bashrc or ~/.zshrc
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+export PATH=$PATH:$ANDROID_HOME/tools
+export PATH=$PATH:$ANDROID_HOME/tools/bin
+```
+
+4. Run the application:
+```bash
 npm run android
-
-# OR using Yarn
-yarn android
+```
+or
+```
+npx react-native start
 ```
 
-### For iOS
+## Usage
 
-```bash
-# using npm
-npm run ios
+### SDK Initialization
 
-# OR using Yarn
-yarn ios
-```
+1. Launch the app and enter your Truemetrics SDK API key in the input field
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+### Recording Management
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+Once initialized, you can:
+- Start recording by tapping "Start recording"
+- Stop recording by tapping "Stop recording"
+- View current SDK state at the top of the screen
+- Monitor any SDK errors that appear below the state
 
-## Step 3: Modifying your App
+### Metadata Logging
 
-Now that you have successfully run the app, let's modify it.
+When the SDK is initialized:
+1. Tap "Log metadata"
+2. Enter key and value in the respective fields
+3. Tap "Log metadata" to save
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+### Permissions
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+The app will request the following permissions as needed:
+- Phone state
+- Activity recognition
+- Location (both foreground and background)
 
-## Congratulations! :tada:
+## Project Structure
 
-You've successfully run and modified your React Native App. :partying_face:
+- `App.tsx`: Main application component
+- `HomeScreen`: Primary screen for SDK control
+- `LogMetadataScreen`: Screen for metadata management
+- Android native module integration for Truemetrics SDK
 
-### Now what?
+## SDK States
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
+The application handles the following SDK states:
+- `UNINITIALIZED`: Uninitialized state
+- `INITIALIZED`: SDK is ready for use
+- `RECORDING_IN_PROGRESS`: Currently recording
+- `RECORDING_STOPPED`: Recording has been stopped
 
-# Troubleshooting
+## Error Handling
 
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+- SDK errors are displayed in red below the status
+- Errors include both error codes and messages from the SDK
 
-# Learn More
+## Dependencies
 
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- React Native
+- @react-navigation/native
+- @react-navigation/native-stack
+- Truemetrics SDK for Android
