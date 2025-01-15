@@ -119,7 +119,7 @@ dependencies {
         implementation jscFlavor
     }
 
-    implementation ("io.truemetrics:truemetricssdk:1.0.4")
+    implementation ("io.truemetrics:truemetricssdk:1.0.24")
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)

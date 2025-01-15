@@ -40,11 +40,12 @@ const { TruemetricsSdkModule } = NativeModules;
 
 const Stack = createNativeStackNavigator();
 
-function HomeScreen({ navigation }): JSX.Element {
+function HomeScreen({ navigation }: { navigation: any }): JSX.Element {
 
   const [truemetricsApiKey, setTruemetricsApiKey] = useMMKVStorage('truemetricsApiKey', storage, '');
   const [sdkState, setSdkState] = useState('')
   const [inputApiKey, setInputApiKey] = useState('')
+  const [sdkError, setSdkError] = useState('')
 
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -64,9 +65,15 @@ function HomeScreen({ navigation }): JSX.Element {
       requestPermissions(event.permissions)
     });
 
+    let sdkErrorsListener = eventEmitter.addListener('SDK_ERROR', event => {
+      console.log('SDK_ERROR event: ' + event.error)
+      setSdkError(event.error)
+    });
+
     return () => {
       sdkStateEventListener.remove()
       sdkPermissionsListener.remove()
+      sdkErrorsListener.remove()
     };
   }, []);
 
@@ -88,6 +95,10 @@ function HomeScreen({ navigation }): JSX.Element {
         <View style={styles.content}>
 
           <Text>{'SDK status: ' + sdkState}</Text>
+
+          {sdkError !== '' && (
+            <Text style={styles.errorText}>{'Error: ' + sdkError}</Text>
+          )}
 
           <View style={{ margin: 10 }} />
           {
@@ -135,7 +146,7 @@ function HomeScreen({ navigation }): JSX.Element {
   );
 }
 
-function LogMetadataScreen({ navigation }) {
+function LogMetadataScreen({ navigation }: { navigation: any }) {
 
   const [key, setKey] = useState('')
   const [value, setValue] = useState('')
@@ -252,6 +263,10 @@ const styles = StyleSheet.create({
   content: {
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 5,
   }
 });
 

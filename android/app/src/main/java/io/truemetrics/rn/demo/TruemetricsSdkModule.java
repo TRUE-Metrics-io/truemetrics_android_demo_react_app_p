@@ -30,6 +30,8 @@ import io.truemetrics.truemetricssdk.TruemetricsSDK;
 import io.truemetrics.truemetricssdk.config.Config;
 import io.truemetrics.truemetricssdk.engine.state.State;
 
+import com.facebook.react.bridge.UiThreadUtil;
+
 public class TruemetricsSdkModule extends ReactContextBaseJavaModule {
 
     private static final String TAG = "TruemetricsSdkModule";
@@ -48,45 +50,48 @@ public class TruemetricsSdkModule extends ReactContextBaseJavaModule {
     public void initializeSdk(String apiKey) {
         Log.d(TAG, "initializeSdk apiKey=" + apiKey);
 
-        NotificationManagerCompat notifManager = NotificationManagerCompat.from(getReactApplicationContext());
+        UiThreadUtil.runOnUiThread(() -> {
 
-        notifManager.createNotificationChannel(
-                new NotificationChannelCompat.Builder("FOREGROUND_SERVICE_CHANNEL", NotificationManagerCompat.IMPORTANCE_LOW)
-                        .setName("Foreground service")
-                        .setShowBadge(false)
-                        .build()
-        );
+            NotificationManagerCompat notifManager = NotificationManagerCompat.from(getReactApplicationContext());
 
-        Notification notif = new NotificationCompat.Builder(getReactApplicationContext(), "FOREGROUND_SERVICE_CHANNEL")
-                .setContentTitle("Foreground service")
-                .setSmallIcon(R.drawable.ic_notification_logo)
-                .setOngoing(true)
-                .build();
+            notifManager.createNotificationChannel(
+                    new NotificationChannelCompat.Builder("FOREGROUND_SERVICE_CHANNEL", NotificationManagerCompat.IMPORTANCE_LOW)
+                            .setName("Foreground service")
+                            .setShowBadge(false)
+                            .build()
+            );
 
-        Config config = new Config(apiKey, notif, true);
+            Notification notif = new NotificationCompat.Builder(getReactApplicationContext(), "FOREGROUND_SERVICE_CHANNEL")
+                    .setContentTitle("Foreground service")
+                    .setSmallIcon(R.drawable.ic_notification_logo)
+                    .setOngoing(true)
+                    .build();
 
-        TruemetricsSDK.setStatusListener(new StatusListener() {
-            @Override
-            public void onStateChange(@NonNull State state) {
-                Log.d(TAG, "onStateChange state=" + state);
-                sendSdkStateChangedEvent(state.name());
-            }
+            Config config = new Config(apiKey, notif, true);
 
-            @Override
-            public void onError(@NonNull ErrorCode errorCode, @Nullable String message) {
-                Log.d(TAG, "onError errorCode=" + errorCode+" message="+message);
+            TruemetricsSDK.setStatusListener(new StatusListener() {
+                @Override
+                public void onStateChange(@NonNull State state) {
+                    Log.d(TAG, "onStateChange state=" + state);
+                    sendSdkStateChangedEvent(state.name());
+                }
 
-            }
+                @Override
+                public void onError(@NonNull ErrorCode errorCode, @Nullable String message) {
+                    Log.d(TAG, "onError errorCode=" + errorCode+" message="+message);
+                    sendSdkErrorEvent(errorCode.name()+":"+message);
+                }
 
-            @Override
-            public void askPermissions(@NonNull List<String> list) {
-                Log.d(TAG, "askPermissions list=" + list);
-                sendSdkPermissionsEvent(list);
-            }
+                @Override
+                public void askPermissions(@NonNull List<String> list) {
+                    Log.d(TAG, "askPermissions list=" + list);
+                    sendSdkPermissionsEvent(list);
+                }
+            });
+
+            TruemetricsSDK.initialize(getReactApplicationContext(), config);
         });
-
-        TruemetricsSDK.initialize(getReactApplicationContext(), config);
-    }
+    };
 
     @ReactMethod
     public void startRecording() {
@@ -128,6 +133,15 @@ public class TruemetricsSdkModule extends ReactContextBaseJavaModule {
         getReactApplicationContext()
                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit("SDK_PERMISSIONS", params);
+    }
+
+    private void sendSdkErrorEvent(String error) {
+        WritableMap params = Arguments.createMap();
+        params.putString("error", error);
+
+        getReactApplicationContext()
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit("SDK_ERROR", params);
     }
 }
 
